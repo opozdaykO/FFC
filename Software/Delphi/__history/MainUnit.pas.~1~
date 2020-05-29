@@ -40,7 +40,7 @@ type
     procedure OnMinimize(Sender: TObject);
     procedure Autorun(enable: Boolean);
     function f2c(f: single): single;
-    //function c2f(c: single): single;
+    function c2f(c: single): single;
     function GetTemp: single;
   public
 
@@ -81,10 +81,10 @@ begin
   Connect(PortSelector.Text);
 end;
 
-{function TForm1.c2f(c: single): single;
+function TForm1.c2f(c: single): single;
 begin
   result := (c * 9 / 5) + 32
-end;}
+end;
 
 procedure TForm1.CheckBox2Click(Sender: TObject);
 begin
@@ -99,7 +99,8 @@ begin
   if (not ComPort.PortOpen) then
   begin
     if port = '' then
-      Log.Lines.Add('Error: Serial port not exist.')
+      Log.Lines.Add('Error:Serial port not exist.')
+      // MessageBox(0,'Error:Serial port not exist.','ERROR!',MB_OK or MB_ICONERROR)
     else
     begin
       ComPort.CommName := port;
@@ -221,6 +222,8 @@ begin
       result := f2c(Temp / Data.uiCoreCnt)
     else
       result := Temp / Data.uiCoreCnt;
+    // Log.Lines.Add('Note: Temperature ' + FloatToStrF((Temp / (Data.uiCoreCnt)),
+    // ffFixed, 7, 0) + 'C');
   end;
 end;
 
@@ -276,6 +279,20 @@ end;
 
 procedure TForm1.Timer1Timer(Sender: TObject);
 begin
+  { var
+    Data: CORE_TEMP_SHARED_DATA;
+    I: integer;
+    Temp: single;
+    begin
+    if fnGetCoreTempInfo(Data) then
+    begin
+    for I := 0 to Data.uiCoreCnt - 1 do
+    begin
+    Temp := Temp + Data.fTemp[I];
+    end;
+    Log.Lines.Add('Note: Temperature ' + FloatToStrF((Temp / (Data.uiCoreCnt)),
+    ffFixed, 7, 0) + 'C');
+    end; }
   Application.Minimize;
   AlphaBlend := false;
   Timer1.Enabled := false;
