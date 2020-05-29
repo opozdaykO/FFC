@@ -1,12 +1,16 @@
 #define relay_port D7
-#define button_port D6
+#define UseButton
 //#define AutoOn true
 #define AutoOn false
 
 
 
 boolean relay_state = false;
+
+#ifdef UseButton
 boolean already_pressed = false;
+#define button_port D6
+#endif
 
 void relayOn() {
   relay_state = true;
@@ -30,7 +34,9 @@ void getRelayState() {
 }
 void setup() {
   pinMode(relay_port, OUTPUT);
+  #ifdef UseBotton
   pinMode(button_port, INPUT);
+  #endif
   Serial.begin(9600);
   if (AutoOn) relayOn();
 }
@@ -39,7 +45,6 @@ void loop() {
   byte buf;
   if (Serial.available()) {
     buf = Serial.read();
-    //Serial.println(buf);
     if (buf == 48) {
       relayOff();                  
     } else if (buf == 49) {
@@ -48,6 +53,7 @@ void loop() {
       getRelayState();
     }
   }
+  #ifdef UseButton
   if (already_pressed) {
     if (digitalRead(button_port) == LOW) {
       already_pressed = false;
@@ -60,5 +66,6 @@ void loop() {
       relayOn();
     }
   }
+  #endif
   delay(50);
 }
