@@ -6,13 +6,13 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, SPComm, Registry, Vcl.StdCtrls,
-  System.StrUtils, GetCoreTempInfoDelphi, Vcl.ExtCtrls, INIFiles;
+  System.StrUtils, GetCoreTempInfoDelphi, Vcl.ExtCtrls, INIFiles, Vcl.Menus,
+  Vcl.Imaging.pngimage;
 
 type
   TFFCForm = class(TForm)
     PortSelector: TComboBox;
     PrtUpd: TButton;
-    Log: TMemo;
     CnBtn: TButton;
     TrayIcon1: TTrayIcon;
     Timer1: TTimer;
@@ -21,6 +21,14 @@ type
     Timer2: TTimer;
     MaxEdit: TEdit;
     MinEdit: TEdit;
+    PopupMenu1: TPopupMenu;
+    N1: TMenuItem;
+    N2: TMenuItem;
+    N3: TMenuItem;
+    N4: TMenuItem;
+    N5: TMenuItem;
+    Image1: TImage;
+    temper: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure PrtUpdClick(Sender: TObject);
@@ -31,6 +39,11 @@ type
     procedure Timer2Timer(Sender: TObject);
     procedure MaxEditChange(Sender: TObject);
     procedure MinEditChange(Sender: TObject);
+    procedure N1Click(Sender: TObject);
+    procedure N4Click(Sender: TObject);
+    procedure N2Click(Sender: TObject);
+    procedure N5Click(Sender: TObject);
+    procedure Image1Click(Sender: TObject);
   private
     procedure PortsUpd;
     function SendString(const Str: AnsiString): Boolean;
@@ -42,6 +55,7 @@ type
     function f2c(f: single): single;
     // function c2f(c: single): single;
     function GetTemp: single;
+    procedure ChangePic(state: Boolean);
   public
 
   end;
@@ -99,18 +113,18 @@ begin
   if (not ComPort.PortOpen) then
   begin
     if port = '' then
-      Log.Lines.Add('Error: Serial port not exist.')
+      // Log.Lines.Add('Error: Serial port not exist.')
     else
     begin
       ComPort.CommName := port;
       ComPort.StartComm;
       if ComPort.PortOpen then
       begin
-        Log.Lines.Add('Note: Connected to serial port.');
+        // Log.Lines.Add('Note: Connected to serial port.');
       end
       else
       begin
-        Log.Lines.Add('Error: Serial port connect failed.');
+        // Log.Lines.Add('Error: Serial port connect failed.');
       end;
     end;
   end
@@ -121,8 +135,8 @@ begin
     begin
       Connect(port);
     end
-    else
-      Log.Lines.Add('Error: Serial port disconnect failed.');
+    // else
+    // Log.Lines.Add('Error: Serial port disconnect failed.');
   end;
 end;
 
@@ -134,6 +148,26 @@ end;
 procedure TFFCForm.MinEditChange(Sender: TObject);
 begin
   StopFan := StrToFloat(MinEdit.Text);
+end;
+
+procedure TFFCForm.N1Click(Sender: TObject);
+begin
+  SendString('1');
+end;
+
+procedure TFFCForm.N2Click(Sender: TObject);
+begin
+  SendString('0');
+end;
+
+procedure TFFCForm.N4Click(Sender: TObject);
+begin
+  TrayIcon1.OnDblClick(FFCForm);
+end;
+
+procedure TFFCForm.N5Click(Sender: TObject);
+begin
+  Close;
 end;
 
 function TFFCForm.f2c(f: single): single;
@@ -161,9 +195,9 @@ begin
   MinEdit.Text := FloatToStrF(StopFan, ffFixed, 7, 0);
   ComPort := TComm.Create(Self);
   ComPort.OnReceiveData := ReceiveData;
-  Log.Clear;
-  Log.Lines.Add('Note: Max temperature = ' + MaxEdit.Text + 'C');
-  Log.Lines.Add('Note: Min temperature = ' + MinEdit.Text + 'C');
+  // Log.Clear;
+  // Log.Lines.Add('Note: Max temperature = ' + MaxEdit.Text + 'C');
+  // Log.Lines.Add('Note: Min temperature = ' + MinEdit.Text + 'C');
   PortsUpd;
   if PortFromIni <> '' then
   begin
@@ -172,23 +206,25 @@ begin
         detect := true;
     if detect then
     begin
-      Log.Lines.Add('Note: String "Port" detected. Port = ' + PortFromIni);
+      // Log.Lines.Add('Note: String "Port" detected. Port = ' + PortFromIni);
       PortSelector.Text := PortFromIni;
       Connect(PortFromIni);
     end
     else
-      Log.Lines.Add('Note: String "Port" undetected.');
+      // Log.Lines.Add('Note: String "Port" undetected.');
+      MessageBox(hInstance, 'String "Port" undetected.', 'Note!',
+        MB_OK or MB_ICONWARNING);
   end
   else
-    Log.Lines.Add('Note: String "Port" is empty.');
+    MessageBox(hInstance, 'String "Port" is empty.', 'Note!',
+      MB_OK or MB_ICONWARNING);
+  // Log.Lines.Add('Note: String "Port" is empty.');
   if TrayCB.Checked then
   begin
     AlphaBlend := true;
     AlphaBlendValue := 0;
     Timer1.Enabled := true;
   end;
-  if ComPort.PortOpen then
-    SendString('2');
 end;
 
 procedure TFFCForm.FormDestroy(Sender: TObject);
@@ -229,6 +265,14 @@ begin
   end;
 end;
 
+procedure TFFCForm.Image1Click(Sender: TObject);
+begin
+  if FanState then
+    SendString('0')
+  else
+    SendString('1');
+end;
+
 procedure TFFCForm.OnMinimize(Sender: TObject);
 begin
   Hide();
@@ -255,22 +299,38 @@ begin
   buf.Free;
 end;
 
+procedure TFFCForm.ChangePic(state: Boolean);
+var
+  res: TResourceStream;
+begin
+  if state then
+    res := TResourceStream.Create(hInstance, 'ON', PChar('IMG'))
+  else
+    res := TResourceStream.Create(hInstance, 'OFF', PChar('IMG'));
+  Image1.Picture.LoadFromStream(res);
+  res.Free;
+end;
+
 procedure TFFCForm.ReceiveData(Sender: TObject; Buffer: PAnsiChar;
   BufferLength: Word);
 begin
   case IndexStr(Buffer, ['0', '1']) of
     0:
       begin
-        Log.Lines.Add('Note: Fan is off.');
+        // Log.Lines.Add('Note: Fan is off.');
+        TrayIcon1.Hint := 'Fan is off.';
+        ChangePic(false);
         FanState := false;
       end;
     1:
       begin
-        Log.Lines.Add('Note: Fan is on.');
+        // Log.Lines.Add('Note: Fan is on.');
+        TrayIcon1.Hint := 'Fan is on.';
+        ChangePic(true);
         FanState := true;
-      end
-  else
-    Log.Text := Log.Text + Buffer;
+      end;
+    // else
+    // Log.Text := Log.Text + Buffer;
   end;
 end;
 
@@ -288,7 +348,10 @@ end;
 
 procedure TFFCForm.Timer2Timer(Sender: TObject);
 begin
-  Log.Lines.Add('Note: Temperature ' + FloatToStrF(GetTemp, ffFixed, 7, 0));
+if ComPort.PortOpen then
+    SendString('2');
+  // Log.Lines.Add('Note: Temperature ' + FloatToStrF(GetTemp, ffFixed, 7, 0));
+  temper.Caption := FloatToStrF(GetTemp, ffFixed, 7, 0) + 'C';
   if Trigger then
   begin
     if GetTemp <= StopFan then
@@ -296,7 +359,7 @@ begin
       if FanState then
         SendString('0');
       Trigger := false;
-      Log.Lines.Add('Note: Fan is off by trigger.');
+      // Log.Lines.Add('Note: Fan is off by trigger.');
     end;
   end
   else
@@ -306,7 +369,7 @@ begin
       if not FanState then
         SendString('1');
       Trigger := true;
-      Log.Lines.Add('Note: Fan is on by trigger.');
+      // Log.Lines.Add('Note: Fan is on by trigger.');
     end;
   end;
 end;

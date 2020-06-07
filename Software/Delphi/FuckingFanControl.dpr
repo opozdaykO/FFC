@@ -1,5 +1,9 @@
 program FuckingFanControl;
 
+
+
+{$R *.dres}
+
 uses
   Vcl.Forms,
   MainUnit in 'MainUnit.pas' {FFCForm},

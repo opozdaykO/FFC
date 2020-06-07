@@ -133,6 +133,14 @@
         </DCCReference>
         <DCCReference Include="GetCoreTempInfoDelphi.pas"/>
         <DCCReference Include="SPComm.pas"/>
+        <RcItem Include="off.png">
+            <ResourceType>IMG</ResourceType>
+            <ResourceId>OFF</ResourceId>
+        </RcItem>
+        <RcItem Include="on.png">
+            <ResourceType>IMG</ResourceType>
+            <ResourceId>ON</ResourceId>
+        </RcItem>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -162,14 +170,32 @@
                 </Excluded_Packages>
             </Delphi.Personality>
             <Deployment Version="3">
+                <DeployFile LocalName="on.png" Configuration="Release" Class="ProjectFile">
+                    <Platform Name="Win64">
+                        <RemoteDir>.\</RemoteDir>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="Win32\Release\FuckingFanControl.exe" Configuration="Release" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>FuckingFanControl.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="off.png" Configuration="Release" Class="ProjectFile">
+                    <Platform Name="Win64">
+                        <RemoteDir>.\</RemoteDir>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployFile LocalName="Win32\Debug\FuckingFanControl.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>FuckingFanControl.exe</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="Win32\Release\FuckingFanControl.exe" Configuration="Release" Class="ProjectOutput">
-                    <Platform Name="Win32">
+                <DeployFile LocalName="Win64\Release\FuckingFanControl.exe" Configuration="Release" Class="ProjectOutput">
+                    <Platform Name="Win64">
                         <RemoteName>FuckingFanControl.exe</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
