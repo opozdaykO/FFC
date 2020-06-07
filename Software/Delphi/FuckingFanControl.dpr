@@ -2,15 +2,19 @@ program FuckingFanControl;
 
 uses
   Vcl.Forms,
-  MainUnit in 'MainUnit.pas' {Form1},
+  MainUnit in 'MainUnit.pas' {FFCForm},
   GetCoreTempInfoDelphi in 'GetCoreTempInfoDelphi.pas',
-  SPComm in 'SPComm.pas';
+  SPComm in 'SPComm.pas',
+  Vcl.Themes,
+  Vcl.Styles;
 
 {$R *.res}
 
 begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
-  Application.CreateForm(TForm1, Form1);
+  TStyleManager.TrySetStyle('Windows10 Dark');
+  Application.CreateForm(TFFCForm, FFCForm);
   Application.Run;
+
 end.

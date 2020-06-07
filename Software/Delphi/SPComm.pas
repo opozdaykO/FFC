@@ -269,7 +269,8 @@ type
     // 追加端口号属性
     property PortOpenError: String read FPortOpenError write FPortOpenError;
     // 追加只读端口打开错误字段
-    property Output: AnsiString read FOutput write SetOutput; // 追加发送数据属性
+    property Output: AnsiString read FOutput write SetOutput;
+    // 追加发送数据属性
     property InputLen: Word read FInputLen write SetInputLen default 1;
     property InBufferSize: Word read FInBufferSize write SetInBufferSize
       default 2048;
