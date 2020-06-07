@@ -9,28 +9,28 @@ uses
   System.StrUtils, GetCoreTempInfoDelphi, Vcl.ExtCtrls, INIFiles;
 
 type
-  TForm1 = class(TForm)
+  TFFCForm = class(TForm)
     PortSelector: TComboBox;
-    Button1: TButton;
+    PrtUpd: TButton;
     Log: TMemo;
-    Button2: TButton;
+    CnBtn: TButton;
     TrayIcon1: TTrayIcon;
     Timer1: TTimer;
-    CheckBox1: TCheckBox;
-    CheckBox2: TCheckBox;
+    TrayCB: TCheckBox;
+    AutoRunCB: TCheckBox;
     Timer2: TTimer;
-    Edit1: TEdit;
-    Edit2: TEdit;
+    MaxEdit: TEdit;
+    MinEdit: TEdit;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
-    procedure Button2Click(Sender: TObject);
+    procedure PrtUpdClick(Sender: TObject);
+    procedure CnBtnClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure TrayIcon1DblClick(Sender: TObject);
-    procedure CheckBox2Click(Sender: TObject);
+    procedure AutoRunCBClick(Sender: TObject);
     procedure Timer2Timer(Sender: TObject);
-    procedure Edit1Change(Sender: TObject);
-    procedure Edit2Change(Sender: TObject);
+    procedure MaxEditChange(Sender: TObject);
+    procedure MinEditChange(Sender: TObject);
   private
     procedure PortsUpd;
     function SendString(const Str: AnsiString): Boolean;
@@ -40,14 +40,14 @@ type
     procedure OnMinimize(Sender: TObject);
     procedure Autorun(enable: Boolean);
     function f2c(f: single): single;
-    //function c2f(c: single): single;
+    // function c2f(c: single): single;
     function GetTemp: single;
   public
 
   end;
 
 var
-  Form1: TForm1;
+  FFCForm: TFFCForm;
   ComPort: TComm;
   INI: TINIFile;
   StartFan, StopFan: single;
@@ -57,7 +57,7 @@ implementation
 
 {$R *.dfm}
 
-procedure TForm1.Autorun(enable: Boolean);
+procedure TFFCForm.Autorun(enable: Boolean);
 var
   R: TRegistry;
 begin
@@ -71,30 +71,30 @@ begin
   R.Free;
 end;
 
-procedure TForm1.Button1Click(Sender: TObject);
+procedure TFFCForm.PrtUpdClick(Sender: TObject);
 begin
   PortsUpd;
 end;
 
-procedure TForm1.Button2Click(Sender: TObject);
+procedure TFFCForm.CnBtnClick(Sender: TObject);
 begin
   Connect(PortSelector.Text);
 end;
 
-{function TForm1.c2f(c: single): single;
-begin
+{ function TForm1.c2f(c: single): single;
+  begin
   result := (c * 9 / 5) + 32
-end;}
+  end; }
 
-procedure TForm1.CheckBox2Click(Sender: TObject);
+procedure TFFCForm.AutoRunCBClick(Sender: TObject);
 begin
-  if CheckBox2.Checked then
+  if AutoRunCB.Checked then
     Autorun(true)
   else
     Autorun(false);
 end;
 
-procedure TForm1.Connect(port: string);
+procedure TFFCForm.Connect(port: string);
 begin
   if (not ComPort.PortOpen) then
   begin
@@ -126,22 +126,22 @@ begin
   end;
 end;
 
-procedure TForm1.Edit1Change(Sender: TObject);
+procedure TFFCForm.MaxEditChange(Sender: TObject);
 begin
-  StartFan := StrToFloat(Edit1.Text);
+  StartFan := StrToFloat(MaxEdit.Text);
 end;
 
-procedure TForm1.Edit2Change(Sender: TObject);
+procedure TFFCForm.MinEditChange(Sender: TObject);
 begin
-  StartFan := StrToFloat(Edit1.Text);
+  StopFan := StrToFloat(MinEdit.Text);
 end;
 
-function TForm1.f2c(f: single): single;
+function TFFCForm.f2c(f: single): single;
 begin
   result := (f - 32) * 5 / 9
 end;
 
-procedure TForm1.FormCreate(Sender: TObject);
+procedure TFFCForm.FormCreate(Sender: TObject);
 var
   PortFromIni: string;
   I: integer;
@@ -155,15 +155,15 @@ begin
   PortFromIni := INI.ReadString('Device', 'Port', '');
   StartFan := INI.ReadFloat('Temperature', 'StartFan', 50);
   StopFan := INI.ReadFloat('Temperature', 'StopFan', 45);
-  CheckBox1.Checked := INI.ReadBool('Soft', 'Tray', false);
-  CheckBox2.Checked := INI.ReadBool('Soft', 'Autorun', false);
-  Edit1.Text := FloatToStrF(StartFan, ffFixed, 7, 0);
-  Edit2.Text := FloatToStrF(StopFan, ffFixed, 7, 0);
+  TrayCB.Checked := INI.ReadBool('Soft', 'Tray', false);
+  AutoRunCB.Checked := INI.ReadBool('Soft', 'Autorun', false);
+  MaxEdit.Text := FloatToStrF(StartFan, ffFixed, 7, 0);
+  MinEdit.Text := FloatToStrF(StopFan, ffFixed, 7, 0);
   ComPort := TComm.Create(Self);
   ComPort.OnReceiveData := ReceiveData;
   Log.Clear;
-  Log.Lines.Add('Note: Max temperature = ' + Edit1.Text + 'C');
-  Log.Lines.Add('Note: Min temperature = ' + Edit2.Text + 'C');
+  Log.Lines.Add('Note: Max temperature = ' + MaxEdit.Text + 'C');
+  Log.Lines.Add('Note: Min temperature = ' + MinEdit.Text + 'C');
   PortsUpd;
   if PortFromIni <> '' then
   begin
@@ -181,7 +181,7 @@ begin
   end
   else
     Log.Lines.Add('Note: String "Port" is empty.');
-  if CheckBox1.Checked then
+  if TrayCB.Checked then
   begin
     AlphaBlend := true;
     AlphaBlendValue := 0;
@@ -191,21 +191,21 @@ begin
     SendString('2');
 end;
 
-procedure TForm1.FormDestroy(Sender: TObject);
+procedure TFFCForm.FormDestroy(Sender: TObject);
 begin
   INI.WriteString('Device', 'Port', PortSelector.Text);
-  StopFan := StrToFloat(Edit2.Text);
-  StartFan := StrToFloat(Edit1.Text);
+  StopFan := StrToFloat(MinEdit.Text);
+  StartFan := StrToFloat(MaxEdit.Text);
   INI.WriteFloat('Temperature', 'StartFan', StartFan);
   INI.WriteFloat('Temperature', 'StopFan', StopFan);
-  INI.WriteBool('Soft', 'Tray', CheckBox1.Checked);
-  INI.WriteBool('Soft', 'Autorun', CheckBox2.Checked);
+  INI.WriteBool('Soft', 'Tray', TrayCB.Checked);
+  INI.WriteBool('Soft', 'Autorun', AutoRunCB.Checked);
   INI.Free;
   ComPort.StopComm;
   ComPort.Free;
 end;
 
-function TForm1.GetTemp: single;
+function TFFCForm.GetTemp: single;
 var
   Data: CORE_TEMP_SHARED_DATA;
   I: integer;
@@ -221,17 +221,22 @@ begin
       result := f2c(Temp / Data.uiCoreCnt)
     else
       result := Temp / Data.uiCoreCnt;
+  end
+  else
+  begin
+    MessageBox(0, 'Core Temp is not running!', 'Error!', MB_OK or MB_ICONERROR);
+    result := -1;
   end;
 end;
 
-procedure TForm1.OnMinimize(Sender: TObject);
+procedure TFFCForm.OnMinimize(Sender: TObject);
 begin
   Hide();
   WindowState := wsMinimized;
   TrayIcon1.Visible := true;
 end;
 
-procedure TForm1.PortsUpd;
+procedure TFFCForm.PortsUpd;
 var
   R: TRegistry;
   buf: TStringList;
@@ -250,7 +255,7 @@ begin
   buf.Free;
 end;
 
-procedure TForm1.ReceiveData(Sender: TObject; Buffer: PAnsiChar;
+procedure TFFCForm.ReceiveData(Sender: TObject; Buffer: PAnsiChar;
   BufferLength: Word);
 begin
   case IndexStr(Buffer, ['0', '1']) of
@@ -269,19 +274,19 @@ begin
   end;
 end;
 
-function TForm1.SendString(const Str: AnsiString): Boolean;
+function TFFCForm.SendString(const Str: AnsiString): Boolean;
 begin
   result := ComPort.WriteCommData(PAnsiChar(Str), Length(Str));
 end;
 
-procedure TForm1.Timer1Timer(Sender: TObject);
+procedure TFFCForm.Timer1Timer(Sender: TObject);
 begin
   Application.Minimize;
   AlphaBlend := false;
   Timer1.Enabled := false;
 end;
 
-procedure TForm1.Timer2Timer(Sender: TObject);
+procedure TFFCForm.Timer2Timer(Sender: TObject);
 begin
   Log.Lines.Add('Note: Temperature ' + FloatToStrF(GetTemp, ffFixed, 7, 0));
   if Trigger then
@@ -306,7 +311,7 @@ begin
   end;
 end;
 
-procedure TForm1.TrayIcon1DblClick(Sender: TObject);
+procedure TFFCForm.TrayIcon1DblClick(Sender: TObject);
 begin
   TrayIcon1.Visible := false;
   Show();

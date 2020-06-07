@@ -1,8 +1,9 @@
-object Form1: TForm1
+object FFCForm: TFFCForm
   Left = 0
   Top = 0
+  BorderIcons = [biSystemMenu, biMinimize]
   Caption = 'Fucking Fan Control'
-  ClientHeight = 274
+  ClientHeight = 276
   ClientWidth = 585
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -11,6 +12,7 @@ object Form1: TForm1
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
+  Scaled = False
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   PixelsPerInch = 96
@@ -23,14 +25,14 @@ object Form1: TForm1
     TabOrder = 0
     Text = 'PortSelector'
   end
-  object Button1: TButton
+  object PrtUpd: TButton
     Left = 159
     Top = 6
     Width = 34
     Height = 25
     Caption = 'UPD'
     TabOrder = 1
-    OnClick = Button1Click
+    OnClick = PrtUpdClick
   end
   object Log: TMemo
     Left = 8
@@ -41,16 +43,16 @@ object Form1: TForm1
       'Log')
     TabOrder = 2
   end
-  object Button2: TButton
+  object CnBtn: TButton
     Left = 199
     Top = 6
     Width = 58
     Height = 25
     Caption = 'Connect'
     TabOrder = 3
-    OnClick = Button2Click
+    OnClick = CnBtnClick
   end
-  object CheckBox1: TCheckBox
+  object TrayCB: TCheckBox
     Left = 263
     Top = 8
     Width = 112
@@ -58,16 +60,16 @@ object Form1: TForm1
     Caption = #1047#1072#1087#1091#1089#1082#1072#1090#1100' '#1074' '#1090#1088#1077#1077
     TabOrder = 4
   end
-  object CheckBox2: TCheckBox
+  object AutoRunCB: TCheckBox
     Left = 381
     Top = 8
     Width = 82
     Height = 17
     Caption = #1040#1074#1090#1086#1079#1072#1087#1091#1089#1082'.'
     TabOrder = 5
-    OnClick = CheckBox2Click
+    OnClick = AutoRunCBClick
   end
-  object Edit1: TEdit
+  object MaxEdit: TEdit
     Left = 469
     Top = 8
     Width = 52
@@ -75,16 +77,16 @@ object Form1: TForm1
     NumbersOnly = True
     TabOrder = 6
     Text = 'StartFanTemp'
-    OnChange = Edit1Change
+    OnChange = MaxEditChange
   end
-  object Edit2: TEdit
+  object MinEdit: TEdit
     Left = 525
     Top = 8
     Width = 52
     Height = 21
     TabOrder = 7
     Text = 'StopFanTemp'
-    OnChange = Edit2Change
+    OnChange = MinEditChange
   end
   object TrayIcon1: TTrayIcon
     OnDblClick = TrayIcon1DblClick
