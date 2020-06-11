@@ -1,2 +1,4 @@
 OFF IMG "off.png"
 ON IMG "on.png"
+ICON_OFF IMG "off.ico"
+ICON_ON IMG "on.ico"

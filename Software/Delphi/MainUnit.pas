@@ -56,6 +56,7 @@ type
     // function c2f(c: single): single;
     function GetTemp: single;
     procedure ChangePic(state: Boolean);
+    procedure ChangeIcon(state: Boolean);
   public
 
   end;
@@ -65,7 +66,7 @@ var
   ComPort: TComm;
   INI: TINIFile;
   StartFan, StopFan: single;
-  FanState, Trigger: Boolean;
+  FanState, Trigger, PicState, IconState: Boolean;
 
 implementation
 
@@ -135,8 +136,6 @@ begin
     begin
       Connect(port);
     end
-    // else
-    // Log.Lines.Add('Error: Serial port disconnect failed.');
   end;
 end;
 
@@ -195,9 +194,6 @@ begin
   MinEdit.Text := FloatToStrF(StopFan, ffFixed, 7, 0);
   ComPort := TComm.Create(Self);
   ComPort.OnReceiveData := ReceiveData;
-  // Log.Clear;
-  // Log.Lines.Add('Note: Max temperature = ' + MaxEdit.Text + 'C');
-  // Log.Lines.Add('Note: Min temperature = ' + MinEdit.Text + 'C');
   PortsUpd;
   if PortFromIni <> '' then
   begin
@@ -206,19 +202,16 @@ begin
         detect := true;
     if detect then
     begin
-      // Log.Lines.Add('Note: String "Port" detected. Port = ' + PortFromIni);
       PortSelector.Text := PortFromIni;
       Connect(PortFromIni);
     end
     else
-      // Log.Lines.Add('Note: String "Port" undetected.');
       MessageBox(hInstance, 'String "Port" undetected.', 'Note!',
         MB_OK or MB_ICONWARNING);
   end
   else
     MessageBox(hInstance, 'String "Port" is empty.', 'Note!',
       MB_OK or MB_ICONWARNING);
-  // Log.Lines.Add('Note: String "Port" is empty.');
   if TrayCB.Checked then
   begin
     AlphaBlend := true;
@@ -303,12 +296,47 @@ procedure TFFCForm.ChangePic(state: Boolean);
 var
   res: TResourceStream;
 begin
-  if state then
-    res := TResourceStream.Create(hInstance, 'ON', PChar('IMG'))
-  else
-    res := TResourceStream.Create(hInstance, 'OFF', PChar('IMG'));
-  Image1.Picture.LoadFromStream(res);
-  res.Free;
+  if state <> PicState then
+  begin
+    if state then
+    begin
+      res := TResourceStream.Create(hInstance, 'ON', PChar('IMG'));
+      PicState := true;
+    end
+    else
+    begin
+      res := TResourceStream.Create(hInstance, 'OFF', PChar('IMG'));
+      PicState := false;
+    end;
+    Image1.Picture.LoadFromStream(res);
+    res.Free;
+  end;
+end;
+
+procedure TFFCForm.ChangeIcon(state: Boolean);
+var
+  res: TResourceStream;
+begin
+  if state <> IconState then
+  begin
+    if state then
+    begin
+      res := TResourceStream.Create(hInstance, 'ICON_ON', PChar('IMG'));
+      IconState := true;
+    end
+    else
+    begin
+      res := TResourceStream.Create(hInstance, 'ICON_OFF', PChar('IMG'));
+      IconState := false;
+    end;
+    TrayIcon1.Icon.LoadFromStream(res);
+    if TrayIcon1.Visible then
+    begin
+      TrayIcon1.Visible := false;
+      TrayIcon1.Visible := true;
+    end;
+    res.Free;
+  end;
 end;
 
 procedure TFFCForm.ReceiveData(Sender: TObject; Buffer: PAnsiChar;
@@ -317,20 +345,18 @@ begin
   case IndexStr(Buffer, ['0', '1']) of
     0:
       begin
-        // Log.Lines.Add('Note: Fan is off.');
         TrayIcon1.Hint := 'Fan is off.';
         ChangePic(false);
+        ChangeIcon(false);
         FanState := false;
       end;
     1:
       begin
-        // Log.Lines.Add('Note: Fan is on.');
         TrayIcon1.Hint := 'Fan is on.';
         ChangePic(true);
+        ChangeIcon(true);
         FanState := true;
       end;
-    // else
-    // Log.Text := Log.Text + Buffer;
   end;
 end;
 
@@ -348,9 +374,8 @@ end;
 
 procedure TFFCForm.Timer2Timer(Sender: TObject);
 begin
-if ComPort.PortOpen then
+  if ComPort.PortOpen then
     SendString('2');
-  // Log.Lines.Add('Note: Temperature ' + FloatToStrF(GetTemp, ffFixed, 7, 0));
   temper.Caption := FloatToStrF(GetTemp, ffFixed, 7, 0) + 'C';
   if Trigger then
   begin
@@ -359,7 +384,6 @@ if ComPort.PortOpen then
       if FanState then
         SendString('0');
       Trigger := false;
-      // Log.Lines.Add('Note: Fan is off by trigger.');
     end;
   end
   else
@@ -369,7 +393,6 @@ if ComPort.PortOpen then
       if not FanState then
         SendString('1');
       Trigger := true;
-      // Log.Lines.Add('Note: Fan is on by trigger.');
     end;
   end;
 end;

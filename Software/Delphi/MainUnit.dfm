@@ -103,8 +103,8 @@ object FFCForm: TFFCForm
   object TrayIcon1: TTrayIcon
     PopupMenu = PopupMenu1
     OnDblClick = TrayIcon1DblClick
-    Left = 40
-    Top = 240
+    Left = 72
+    Top = 168
   end
   object Timer1: TTimer
     Enabled = False
