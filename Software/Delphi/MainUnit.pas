@@ -44,6 +44,7 @@ type
     procedure N2Click(Sender: TObject);
     procedure N5Click(Sender: TObject);
     procedure Image1Click(Sender: TObject);
+    procedure TrayIcon1Click(Sender: TObject);
   private
     procedure PortsUpd;
     function SendString(const Str: AnsiString): Boolean;
@@ -395,6 +396,14 @@ begin
       Trigger := true;
     end;
   end;
+end;
+
+procedure TFFCForm.TrayIcon1Click(Sender: TObject);
+begin
+  if FanState then
+    SendString('0')
+  else
+    SendString('1');
 end;
 
 procedure TFFCForm.TrayIcon1DblClick(Sender: TObject);

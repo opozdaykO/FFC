@@ -102,6 +102,7 @@ object FFCForm: TFFCForm
   end
   object TrayIcon1: TTrayIcon
     PopupMenu = PopupMenu1
+    OnClick = TrayIcon1Click
     OnDblClick = TrayIcon1DblClick
     Left = 72
     Top = 168
